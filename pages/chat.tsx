@@ -1,10 +1,16 @@
+import { type } from "os";
 import React, { useEffect, useState } from "react";
 import { useAppContext } from "../utils/context";
 import { useSubscribe } from "../utils/socket";
 
+type User = {
+  id: string;
+  name: string;
+};
+
 function Chat() {
   const [messages, setMessages] = useState<string[]>([]);
-  const [users, setUsers] = useState<string[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
 
   const { socket, user } = useAppContext();
 
@@ -22,8 +28,8 @@ function Chat() {
     console.log(msg, "msg change");
   }
 
-  const handleNewUser = (id: string) => {
-    console.log("new user", id);
+  const handleNewUser = (user: User) => {
+    setUsers([...users, user]);
   };
 
   useSubscribe({
@@ -38,7 +44,15 @@ function Chat() {
     socket: socket!,
   });
 
-  return <div>Chat</div>;
+  return (
+    <div>
+      <ul>
+        {users.map((user: User) => (
+          <li key={user.id}>{user.name}</li>
+        ))}
+      </ul>
+    </div>
+  );
 }
 
 export default Chat;
