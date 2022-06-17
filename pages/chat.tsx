@@ -1,9 +1,6 @@
-import { User } from "@prisma/client";
-import { GetServerSideProps, NextPage } from "next";
-import React, { useState } from "react";
-import { Socket } from "socket.io-client";
+import React, { useEffect, useState } from "react";
 import { useAppContext } from "../utils/context";
-import { FirstConnection, useSubscribe } from "../utils/socket";
+import { useSubscribe } from "../utils/socket";
 
 function Chat() {
   const [messages, setMessages] = useState<string[]>([]);
@@ -11,12 +8,22 @@ function Chat() {
 
   const { socket, user } = useAppContext();
 
+  useEffect(() => {
+    const handleSocket = (error: string, success: string) => {
+      console.log(error, success);
+    };
+    const payload = {
+      name: "user" + Math.floor(Math.random() * 100),
+    };
+    socket.emit("chat:new user", payload, handleSocket);
+  }, []);
+
   function recieveMsg(msg: string) {
     console.log(msg, "msg change");
   }
 
-  const handleNewUser = () => {
-    console.log("new user");
+  const handleNewUser = (id: string) => {
+    console.log("new user", id);
   };
 
   useSubscribe({
