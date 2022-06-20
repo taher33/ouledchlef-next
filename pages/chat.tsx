@@ -1,4 +1,5 @@
-import { type } from "os";
+import Link from "next/link";
+import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import { useAppContext } from "../utils/context";
 import { useSubscribe } from "../utils/socket";
@@ -11,6 +12,7 @@ type User = {
 function Chat() {
   const [messages, setMessages] = useState<string[]>([]);
   const [users, setUsers] = useState<User[]>([]);
+  const router = useRouter();
 
   const { socket, user } = useAppContext();
 
@@ -23,6 +25,18 @@ function Chat() {
     };
     socket.emit("chat:new user", payload, handleSocket);
   }, []);
+
+  useEffect(() => {
+    const handleSocket = (error: string, success: string, users?: User[]) => {
+      if (error || !users) return console.log(error);
+      setUsers(users);
+    };
+    const payload = {
+      id: socket.id,
+    };
+    console.log(socket.connected);
+    socket.emit("chat:get users", payload, handleSocket);
+  }, [socket.id]);
 
   function recieveMsg(msg: string) {
     console.log(msg, "msg change");
@@ -45,12 +59,31 @@ function Chat() {
   });
 
   return (
-    <div>
-      <ul>
-        {users.map((user: User) => (
-          <li key={user.id}>{user.name}</li>
-        ))}
-      </ul>
+    <div className="flex">
+      <div className="h-screen overflow-scroll">
+        <h3 className="text-xl font-semibold ">chat users</h3>
+        <ul>
+          {users.map((user: User) => (
+            <Link href={`?id=${user.id}`} key={user.id}>
+              <li className="underline">{user.name}</li>
+            </Link>
+          ))}
+        </ul>
+      </div>
+      <div className="ml-4 font-bold relative">
+        <h2 className="text-2xl">messages</h2>
+        <div>
+          {messages.map((msg: string, id: number) => (
+            <p key={id}>{msg}</p>
+          ))}
+        </div>
+        <form className="absolute bottom-0 flex">
+          <input type="text" className="border " />
+          <button type="submit" className="bg-cyan-500 ">
+            send
+          </button>
+        </form>
+      </div>
     </div>
   );
 }
