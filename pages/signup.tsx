@@ -20,7 +20,7 @@ const Signup: NextPage = () => {
 
   const { mutate, isLoading, isError } = useMutation(
     async (data: FormData) => {
-      const resp = await fetch("/api/users", {
+      const resp = await fetch("/api/signup", {
         method: "POST",
         body: JSON.stringify(data),
       });
