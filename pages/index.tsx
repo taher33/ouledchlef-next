@@ -9,7 +9,6 @@ const Home: NextPage = () => {
       <br />
       <Link href="/login">login</Link>
       <br />
-      <Link href="/chat">chat</Link>
     </div>
   );
 };

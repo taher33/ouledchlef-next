@@ -16,7 +16,6 @@ interface State {
       | undefined
     >
   >;
-  socket: Socket;
 }
 export const AppContext = createContext<State>({} as State);
 
