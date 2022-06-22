@@ -1,7 +1,7 @@
 import { GetServerSideProps, NextPage } from "next";
 import Link from "next/link";
-import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
+import MessageForm from "../components/messageForm";
 import { useAppContext } from "../utils/context";
 import { prisma } from "../utils/prisma";
 import { useSubscribe } from "../utils/socket";
@@ -22,15 +22,18 @@ interface Props {
 const Chat: NextPage<Props> = (props) => {
   const [messages, setMessages] = useState<string[]>([]);
   const [users, setUsers] = useState<User[]>([]);
-  const router = useRouter();
-  const { socket, user } = useAppContext();
+
+  const { socket } = useAppContext();
 
   useEffect(() => {
     const handleSocket = (error: string, success: string) => {
       console.log(error, success);
     };
+    if (!props.user) return;
+
     const payload = {
-      name: "user" + Math.floor(Math.random() * 100),
+      name: props.user.name,
+      id: props.user.id,
     };
     socket.emit("chat:new user", payload, handleSocket);
   }, []);
@@ -46,32 +49,24 @@ const Chat: NextPage<Props> = (props) => {
       id: props.user.id,
     };
 
-    socket.send("chat:get users", payload, handleSocket);
+    socket.emit("chat:get users", payload, handleSocket);
   }, []);
 
-  function recieveMsg(msg: string) {
-    console.log(msg, "msg change");
-  }
-
-  const handleNewUser = (user: User) => {
-    setUsers([...users, user]);
-  };
-
   useSubscribe({
-    event: "chat:message",
-    callback: recieveMsg,
+    event: "chat:recieve message",
+    callback: (msg) => console.log("msg", msg),
     socket: socket!,
   });
 
   useSubscribe({
     event: "chat:new user",
-    callback: handleNewUser,
+    callback: (user) => setUsers([...users, user]),
     socket: socket!,
   });
 
   return (
     <div className="flex">
-      <div className="h-screen overflow-scroll">
+      <div className="h-screen overflow-scroll px-6">
         <h3 className="text-xl font-semibold ">chat users</h3>
         <ul>
           {users.map((user: User) => (
@@ -88,12 +83,7 @@ const Chat: NextPage<Props> = (props) => {
             <p key={id}>{msg}</p>
           ))}
         </div>
-        <form className="absolute bottom-5 flex">
-          <input type="text" className="border border-slate-500" />
-          <button type="submit" className="bg-cyan-500 px-2 py-1 rounded-sm">
-            send
-          </button>
-        </form>
+        <MessageForm user={props.user} />
       </div>
     </div>
   );

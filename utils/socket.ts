@@ -6,9 +6,7 @@ export const FirstConnection = () => {
 
   if (!socket) return;
 
-  socket.on("connect", () => {
-    console.log("connected", socket?.id);
-  });
+  socket.on("connect", () => {});
 
   return socket;
 };
