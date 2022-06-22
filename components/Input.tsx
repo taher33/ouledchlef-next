@@ -39,13 +39,15 @@ function Input({ register, errors, type }: Props) {
   return (
     <>
       <label htmlFor={type}>{type}</label>
-      <div>
+      <div className="w-full flex flex-col">
         <input
-          className="border rounded-md w-full border-solid px-2 py-1 border-slate-400 focus:outline-cyan-400 mt-2"
+          className={`border rounded-md border-solid px-2 py-1 border-slate-400 focus:outline-cyan-200 mt-2 ${
+            errors[type] && "border-red-300 focus:outline-red-300"
+          } `}
           type={type}
           {...register(type, validateOptions)}
         />
-        <span className="text-red-500">
+        <span className="text-red-500 w-full whitespace-pre">
           {errors[type] && errors[type].message}
         </span>
       </div>

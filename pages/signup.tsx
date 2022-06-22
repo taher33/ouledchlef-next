@@ -4,6 +4,8 @@ import React from "react";
 import { useMutation } from "react-query";
 import { useForm } from "react-hook-form";
 import Input from "../components/Input";
+import { useAppContext } from "../utils/context";
+import { useRouter } from "next/router";
 
 interface FormData {
   email: string;
@@ -12,6 +14,8 @@ interface FormData {
 }
 
 const Signup: NextPage = () => {
+  const { setUser } = useAppContext();
+  const router = useRouter();
   const {
     register,
     handleSubmit,
@@ -28,10 +32,11 @@ const Signup: NextPage = () => {
       return resp.json();
     },
     {
-      onSuccess(data, variables, context) {
-        console.log("success", data);
+      onSuccess(data) {
+        setUser(data.user);
+        router.push("/");
       },
-      onError(error, variables, context) {
+      onError(error) {
         console.log("error", error);
       },
     }
@@ -56,7 +61,7 @@ const Signup: NextPage = () => {
           className="bg-cyan-400 px-6 py-2 mt-4 rounded-lg font-medium w-full "
           type="submit"
         >
-          {isSubmitting ? "Submitting" : "Submit"}
+          {isLoading ? "Submitting" : "Submit"}
         </button>
       </form>
     </div>

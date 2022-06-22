@@ -1,8 +1,10 @@
 import { GetServerSideProps, NextPage } from "next";
+import { useRouter } from "next/router";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { useMutation } from "react-query";
 import Input from "../components/Input";
+import { useAppContext } from "../utils/context";
 
 interface FormData {
   email: string;
@@ -10,6 +12,8 @@ interface FormData {
 }
 
 const Login: NextPage = () => {
+  const { setUser } = useAppContext();
+  const router = useRouter();
   const {
     register,
     handleSubmit,
@@ -26,10 +30,11 @@ const Login: NextPage = () => {
       return resp.json();
     },
     {
-      onSuccess(data, variables, context) {
-        console.log("success", data);
+      onSuccess(data) {
+        setUser(data.user);
+        router.push("/");
       },
-      onError(error, variables, context) {
+      onError(error) {
         console.log("error", error);
       },
     }
@@ -40,9 +45,9 @@ const Login: NextPage = () => {
   }
 
   return (
-    <div className="max-w-xl mx-auto mt-9">
+    <div className="flex justify-center mx-auto mt-16">
       <form className="block" onSubmit={handleSubmit(onSubmit)}>
-        <h1 className="font-bold text-center mb-3 text-3xl">welcome back</h1>
+        <h1 className="font-bold text-center mb-4 text-3xl">welcome back</h1>
         <Input errors={errors} register={register} type="email" />
         <Input errors={errors} register={register} type="password" />
 

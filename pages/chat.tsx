@@ -1,7 +1,9 @@
+import { GetServerSideProps, NextPage } from "next";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import { useAppContext } from "../utils/context";
+import { prisma } from "../utils/prisma";
 import { useSubscribe } from "../utils/socket";
 
 type User = {
@@ -9,11 +11,18 @@ type User = {
   name: string;
 };
 
-function Chat() {
+interface Props {
+  user: {
+    email: string;
+    id: string;
+    name: string;
+  } | null;
+}
+
+const Chat: NextPage<Props> = (props) => {
   const [messages, setMessages] = useState<string[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const router = useRouter();
-
   const { socket, user } = useAppContext();
 
   useEffect(() => {
@@ -31,12 +40,14 @@ function Chat() {
       if (error || !users) return console.log(error);
       setUsers(users);
     };
+    if (!props.user) return;
+
     const payload = {
-      id: socket.id,
+      id: props.user.id,
     };
-    console.log(socket.connected);
-    socket.emit("chat:get users", payload, handleSocket);
-  }, [socket.id]);
+
+    socket.send("chat:get users", payload, handleSocket);
+  }, []);
 
   function recieveMsg(msg: string) {
     console.log(msg, "msg change");
@@ -77,15 +88,39 @@ function Chat() {
             <p key={id}>{msg}</p>
           ))}
         </div>
-        <form className="absolute bottom-0 flex">
-          <input type="text" className="border " />
-          <button type="submit" className="bg-cyan-500 ">
+        <form className="absolute bottom-5 flex">
+          <input type="text" className="border border-slate-500" />
+          <button type="submit" className="bg-cyan-500 px-2 py-1 rounded-sm">
             send
           </button>
         </form>
       </div>
     </div>
   );
-}
+};
+
+export const getServerSideProps: GetServerSideProps = async ({ res, req }) => {
+  if (!req.cookies.token) {
+    res.writeHead(302, {
+      Location: "/login",
+    });
+    res.end();
+  }
+  const user = await prisma.user.findUnique({
+    where: { id: req.cookies.token },
+    select: { email: true, id: true, name: true },
+  });
+
+  if (!user) {
+    res.writeHead(302, {
+      Location: "/login",
+    });
+    res.end();
+  }
+
+  return {
+    props: { user },
+  };
+};
 
 export default Chat;
