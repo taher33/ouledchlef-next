@@ -45,7 +45,9 @@ function Input({ register, errors, type }: Props) {
             errors[type] && "border-red-300 focus:outline-red-300"
           } `}
           type={type}
-          {...register(type, validateOptions)}
+          {...register(type, {
+            valueAsNumber: true,
+          })}
         />
         <span className="text-red-500 w-full whitespace-pre">
           {errors[type] && errors[type].message}

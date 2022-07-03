@@ -1,29 +1,30 @@
 import type { NextPage } from "next";
 import Link from "next/link";
 import { ReactNode, useEffect, useRef, useState } from "react";
-import { motion, useDragControls } from "framer-motion";
+import { motion, useDragControls, useMotionValue } from "framer-motion";
+import { flushSync } from "react-dom";
 
 const Comp = ({ name }: any) => {
+  const [scale, setScale] = useState(1);
+  flushSync(() => {});
   if (name === "string") {
     return (
-      <motion.div drag className="bg-red-500 relative">
-        <motion.div
-          drag
-          className="w-2 h-2 border border-black absolute top-0 left-0"
-        />
-        <motion.div
-          drag
-          className="w-2 h-2 border border-black absolute top-full left-0"
-        />
-        <motion.div
-          drag
-          className="w-2 h-2 border border-black absolute top-0 left-full"
-        />
-        <motion.div
-          drag
-          className="w-2 h-2 border border-black absolute top-full left-full"
-        />
+      <motion.div
+        style={{
+          scale: scale,
+        }}
+        drag
+        className="bg-red-500 relative"
+      >
         hey there
+        <button
+          onClick={() => {
+            setScale(scale + 0.1);
+          }}
+          className="bg-slate-200 ml-3"
+        >
+          scale up
+        </button>
       </motion.div>
     );
   }
@@ -43,7 +44,7 @@ const Home: NextPage = () => {
   const handleAddtext = (event: any) => {
     setPosition([...position, "string"]);
   };
-
+  const [value, setValue] = useState("");
   const handleAddImg = (event: any) => {
     setPosition([...position, "img"]);
   };
@@ -51,7 +52,17 @@ const Home: NextPage = () => {
   return (
     <div>
       <h1>Hello Next.js</h1>
-
+      <form onSubmit={(evt) => {}}></form>
+      <textarea
+        name=""
+        id=""
+        onChange={(evt) => {
+          setValue(evt.target.value);
+        }}
+        onKeyDownCapture={(e) => console.log(e.code)}
+        value={value}
+      />
+      <Link href="/canvas">canvas</Link>
       <div className="flex">
         <div className="w-screen h-screen border relative border-black">
           <motion.div
